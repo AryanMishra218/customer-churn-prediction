@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Churn Prediction System</title>
+    <style>
+        /* RESET AND BASE STYLES */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* MAIN CONTAINER */
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* HEADER */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        /* FORM STYLES */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* TWO COLUMN LAYOUT */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* BUTTON */
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* LOADING STATE */
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* RESULT BOX */
+        .result-box {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 12px;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .result-box.success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+        }
+
+        .result-box.warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+        }
+
+        .result-box.danger {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+        }
+
+        .result-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .result-details {
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        .result-details strong {
+            color: #333;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+
+        /* INFO TEXT */
+        .info-text {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 12px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>🏦 Customer Churn Prediction</h1>
+            <p>Predict whether a customer will leave the bank</p>
+        </div>
+
+        <!-- INFO BOX -->
+        <div class="info-text">
+            💡 <strong>How it works:</strong> Enter customer details below and click "Predict Churn" to see if the customer is likely to leave the bank.
+        </div>
+
+        <!-- PREDICTION FORM -->
+        <form id="predictionForm">
+            <!-- Row 1 -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="credit_score">Credit Score (300-850)</label>
+                    <input type="number" id="credit_score" name="credit_score" required 
+                           min="300" max="850" value="650" placeholder="e.g., 650">
+                </div>
+
+                <div class="form-group">
+                    <label for="age">Age (18-100)</label>
+                    <input type="number" id="age" name="age" required 
+                           min="18" max="100" value="35" placeholder="e.g., 35">
+                </div>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="geography">Country</label>
+                    <select id="geography" name="geography" required>
+                        <option value="France">France</option>
+                        <option value="Germany">Germany</option>
+                        <option value="Spain">Spain</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender" required>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Row 3 -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tenure">Tenure (Years with Bank: 0-10)</label>
+                    <input type="number" id="tenure" name="tenure" required 
+                           min="0" max="10" value="5" placeholder="e.g., 5">
+                </div>
+
+                <div class="form-group">
+                    <label for="balance">Account Balance ($)</label>
+                    <input type="number" id="balance" name="balance" required 
+                           step="0.01" value="100000" placeholder="e.g., 100000">
+                </div>
+            </div>
+
+            <!-- Row 4 -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="num_products">Number of Products (1-4)</label>
+                    <input type="number" id="num_products" name="num_products" required 
+                           min="1" max="4" value="2" placeholder="e.g., 2">
+                </div>
+
+                <div class="form-group">
+                    <label for="estimated_salary">Estimated Salary ($)</label>
+                    <input type="number" id="estimated_salary" name="estimated_salary" required 
+                           step="0.01" value="75000" placeholder="e.g., 75000">
+                </div>
+            </div>
+
+            <!-- Row 5 -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="has_credit_card">Has Credit Card?</label>
+                    <select id="has_credit_card" name="has_credit_card" required>
+                        <option value="1">Yes</option>
+                        <option value="0">No</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="is_active_member">Is Active Member?</label>
+                    <select id="is_active_member" name="is_active_member" required>
+                        <option value="1">Yes</option>
+                        <option value="0">No</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- SUBMIT BUTTON -->
+            <button type="submit" class="submit-btn" id="submitBtn">
+                🔮 Predict Churn
+            </button>
+        </form>
+
+        <!-- RESULT BOX (Hidden initially) -->
+        <div id="resultBox" class="result-box">
+            <div class="result-title" id="resultTitle"></div>
+            <div class="result-details" id="resultDetails"></div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // Get form and result elements
+        const form = document.getElementById('predictionForm');
+        const resultBox = document.getElementById('resultBox');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultDetails = document.getElementById('resultDetails');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Handle form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent page reload
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Predicting...';
+            resultBox.style.display = 'none';
+
+            try {
+                // Get form data
+                const formData = new FormData(form);
+
+                // Send POST request to backend
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                // Check if there's an error
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Display result
+                displayResult(data);
+
+            } catch (error) {
+                // Display error message
+                resultBox.style.display = 'block';
+                resultBox.className = 'result-box danger';
+                resultTitle.textContent = '❌ Error';
+                resultDetails.innerHTML = `<p>Something went wrong: ${error.message}</p>`;
+            } finally {
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🔮 Predict Churn';
+            }
+        });
+
+        // Function to display prediction result
+        function displayResult(data) {
+            resultBox.style.display = 'block';
+
+            // Determine result box color based on prediction
+            if (data.prediction === 0) {
+                // Customer will stay - GREEN
+                resultBox.className = 'result-box success';
+                resultTitle.textContent = '✅ ' + data.message;
+            } else {
+                // Customer will churn - RED
+                resultBox.className = 'result-box danger';
+                resultTitle.textContent = '⚠️ ' + data.message;
+            }
+
+            // Display detailed results
+            resultDetails.innerHTML = `
+                <p><strong>📊 Churn Probability:</strong> ${data.churn_probability}%</p>
+                <p><strong>✅ Stay Probability:</strong> ${data.stay_probability}%</p>
+                <p><strong>🎯 Risk Level:</strong> ${data.risk_level}</p>
+            `;
+
+            // Scroll to result
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    </script>
+</body>
+</html>
