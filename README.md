@@ -169,8 +169,8 @@ This project is open source and available under the MIT License.
 
 ## 👤 Author
 
-**Your Name**
-- GitHub: [@YOUR_USERNAME](https://github.com/YOUR_USERNAME)
+**Aryan Mishra**
+- GitHub: [@AryanMishra218](https://github.com/AryanMishra218)
 
 ## 🙏 Acknowledgments
 
